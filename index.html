@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Waste Tracking and Redistribution Portal</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+            color: #263238;
+        }
+
+        header {
+            background: #176b45;
+            color: white;
+            padding: 28px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .intro {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px #00000010;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid #2e7d32;
+            box-shadow: 0 4px 14px #00000010;
+        }
+
+        .stat-card h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+            color: #546e7a;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #176b45;
+        }
+
+        .stat-card p {
+            margin-bottom: 0;
+            font-size: 13px;
+            color: #607d8b;
+        }
+
+        .section-title {
+            color: #176b45;
+            margin: 30px 0 16px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            padding: 11px;
+            border: 1px solid #b0bec5;
+            border-radius: 7px;
+            font-size: 14px;
+            background: white;
+        }
+
+        input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .records {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .food-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px #00000010;
+            border-top: 4px solid #43a047;
+        }
+
+        .food-card h3 {
+            color: #176b45;
+            margin-top: 0;
+        }
+
+        .food-card p {
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .available {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .reserved {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .collected {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .redistributed {
+            background: #ede7f6;
+            color: #4527a0;
+        }
+
+        .quantity {
+            font-weight: bold;
+            color: #176b45;
+        }
+
+        .empty {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        footer {
+            background: #176b45;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 760px) {
+            .dashboard {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .records {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 23px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>Food Waste Tracking and Redistribution Portal</h1>
+    <p>Connecting surplus food with communities in need</p>
+</header>
+
+<main class="container">
+    <section class="intro">
+        <h2>Welcome to the Surplus Food Portal</h2>
+        <p>
+            This portal helps authorized community organizations identify,
+            reserve, collect, and redistribute surplus food from university
+            canteens and nearby restaurants before it goes to waste.
+        </p>
+        <p><strong>Sample demonstration data:</strong> Records are illustrative and are not live collection offers.</p>
+    </section>
+
+    <h2 class="section-title">Redistribution Status Dashboard</h2>
+
+    <section class="dashboard" aria-label="Food redistribution summary">
+        <div class="stat-card">
+            <h3>Available Records</h3>
+            <div class="stat-number" id="availableCount">0</div>
+            <p id="availableQuantity">0 kg available for pickup</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Reserved Records</h3>
+            <div class="stat-number" id="reservedCount">0</div>
+            <p id="reservedQuantity">0 kg reserved</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Collected Records</h3>
+            <div class="stat-number" id="collectedCount">0</div>
+            <p id="collectedQuantity">0 kg collected</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Redistributed Records</h3>
+            <div class="stat-number" id="redistributedCount">0</div>
+            <p id="redistributedQuantity">0 kg redistributed</p>
+        </div>
+    </section>
+
+    <h2 class="section-title">Surplus Food Records</h2>
+
+    <div class="filters">
+        <input
+            id="searchInput"
+            type="search"
+            placeholder="Search food, location, or organization..."
+            aria-label="Search surplus food records"
+        >
+
+        <select id="statusFilter" aria-label="Filter by redistribution status">
+            <option value="All">All statuses</option>
+            <option value="Available">Available</option>
+            <option value="Reserved">Reserved</option>
+            <option value="Collected">Collected</option>
+            <option value="Redistributed">Redistributed</option>
+        </select>
+    </div>
+
+    <section class="records" id="foodRecords" aria-live="polite"></section>
+</main>
+
+<footer>
+    Food Waste Tracking Portal | Delivered using Git, Jenkins, Docker and Kubernetes
+</footer>
+
+<script>
+    const foods = [
+        {
+            id: 1,
+            food: "Cooked Rice and Vegetable Curry",
+            contributor: "University Main Canteen",
+            quantity: 25,
+            deadline: "2026-10-22T12:30:00",
+            location: "Main Canteen, Block A",
+            organization: "Helping Hands Community Kitchen",
+            status: "Available"
+        },
+        {
+            id: 2,
+            food: "Fresh Bread and Sandwiches",
+            contributor: "Green Leaf Restaurant",
+            quantity: 12,
+            deadline: "2026-10-22T14:00:00",
+            location: "Restaurant Loading Entrance",
+            organization: "City Food Bank",
+            status: "Reserved"
+        },
+        {
+            id: 3,
+            food: "Vegetable Biryani",
+            contributor: "Campus Food Court",
+            quantity: 18,
+            deadline: "2026-10-22T13:00:00",
+            location: "Food Court, Collection Desk",
+            organization: "Hope Foundation",
+            status: "Collected"
+        },
+        {
+            id: 4,
+            food: "Fresh Fruits",
+            contributor: "Sunrise Cafe",
+            quantity: 10,
+            deadline: "2026-10-22T16:00:00",
+            location: "Cafe Rear Entrance",
+            organization: "Community Care Trust",
+            status: "Redistributed"
+        },
+        {
+            id: 5,
+            food: "Chapati and Dal",
+            contributor: "University Hostel Mess",
+            quantity: 30,
+            deadline: "2026-10-22T19:00:00",
+            location: "Hostel Mess, Gate 2",
+            organization: "Helping Hands Community Kitchen",
+            status: "Available"
+        }
+    ];
+
+    const statuses = [
+        "Available",
+        "Reserved",
+        "Collected",
+        "Redistributed"
+    ];
+
+    function formatDeadline(value) {
+        return new Date(value).toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function updateDashboard() {
+        statuses.forEach(status => {
+            const matching = foods.filter(item => item.status === status);
+            const quantity = matching.reduce(
+                (total, item) => total + item.quantity, 0
+            );
+
+            document.getElementById(
+                status.toLowerCase() + "Count"
+            ).textContent = matching.length;
+
+            document.getElementById(
+                status.toLowerCase() + "Quantity"
+            ).textContent = quantity + " kg " +
+                (status === "Available" ? "available for pickup" :
+                 status.toLowerCase());
+        });
+    }
+
+    function renderFoods() {
+        const search = document.getElementById("searchInput")
+            .value.toLowerCase().trim();
+
+        const selectedStatus = document.getElementById("statusFilter").value;
+
+        const filtered = foods.filter(item => {
+            const matchesSearch = [
+                item.food,
+                item.contributor,
+                item.location,
+                item.organization
+            ].some(value => value.toLowerCase().includes(search));
+
+            const matchesStatus = selectedStatus === "All" ||
+                item.status === selectedStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        const container = document.getElementById("foodRecords");
+
+        if (filtered.length === 0) {
+            container.innerHTML =
+                '<div class="empty">No matching surplus food records found.</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(item => {
+            const safeStatus = item.status.toLowerCase();
+
+            return `
+                <article class="food-card">
+                    <h3>${item.food}</h3>
+                    <p><strong>Contributing outlet:</strong> ${item.contributor}</p>
+                    <p><strong>Estimated quantity:</strong>
+                        <span class="quantity">${item.quantity} kg</span>
+                    </p>
+                    <p><strong>Collection deadline:</strong>
+                        ${formatDeadline(item.deadline)}
+                    </p>
+                    <p><strong>Pickup location:</strong> ${item.location}</p>
+                    <p><strong>Participating organization:</strong>
+                        ${item.organization}
+                    </p>
+                    <p><strong>Redistribution status:</strong>
+                        <span class="status ${safeStatus}">${item.status}</span>
+                    </p>
+                </article>
+            `;
+        }).join("");
+    }
+
+    document.getElementById("searchInput")
+        .addEventListener("input", renderFoods);
+
+    document.getElementById("statusFilter")
+        .addEventListener("change", renderFoods);
+
+    updateDashboard();
+    renderFoods();
+</script>
+</body>
+</html>
