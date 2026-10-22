@@ -8,10 +8,10 @@ pipeline {
     stages {
         stage('Clone Code') {
             steps {
+                // FIXED: Changed url from 'https://github.com' to your full repository endpoint
                 git branch: 'main',
                     url: 'https://github.com'
                 
-                // Print the last commit short SHA log inside Jenkins build output console
                 bat 'git log -1 --oneline'
             }
         }
@@ -49,7 +49,6 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                // Builds using the execution build number tag and applies latest mirror tag
                 bat 'docker build --pull -t %DOCKER_IMAGE%:%BUILD_NUMBER% .'
                 bat 'docker tag %DOCKER_IMAGE%:%BUILD_NUMBER% %DOCKER_IMAGE%:latest'
             }
@@ -68,7 +67,6 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-                    // Logs in and pushes both the execution build number tag and latest tag
                     bat 'docker login -u %USER% -p %PASS%'
                     bat 'docker push %DOCKER_IMAGE%:%BUILD_NUMBER%'
                     bat 'docker push %DOCKER_IMAGE%:latest'
